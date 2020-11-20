@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core.Data.MongoDb\Core.Data.MongoDb.csproj" />
+    <ProjectReference Include="..\UserRegistration.Data.Contracts\UserRegistration.Data.Contracts.csproj" />
+    <ProjectReference Include="..\UserRegistration.Data\UserRegistration.Data.csproj" />
+    <ProjectReference Include="..\UserRegistration.Service.Contracts\UserRegistration.Service.Contracts.csproj" />
+    <ProjectReference Include="..\UserRegistration.Service\UserRegistration.Service.csproj" />
+  </ItemGroup>
+
+</Project>
