@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core.Common\Core.Common.csproj" />
-    <ProjectReference Include="..\UserRegistration.Data\UserRegistration.Data.csproj" />
+    <ProjectReference Include="..\UserRegistration.Data.Sql\UserRegistration.Data.Sql.csproj" />
     <ProjectReference Include="..\UserRegistration.Models\UserRegistration.Models.csproj" />
     <ProjectReference Include="..\UserRegistration.Service\UserRegistration.Service.csproj" />
   </ItemGroup>

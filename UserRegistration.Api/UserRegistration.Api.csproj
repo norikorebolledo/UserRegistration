@@ -7,9 +7,14 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core.WebSocket\Core.WebSocket.csproj" />
     <ProjectReference Include="..\UserRegistration.Bootstrapper\UserRegistration.Bootstrapper.csproj" />
     <ProjectReference Include="..\UserRegistration.Models\UserRegistration.Models.csproj" />
     <ProjectReference Include="..\UserRegistration.Service.Contracts\UserRegistration.Service.Contracts.csproj" />

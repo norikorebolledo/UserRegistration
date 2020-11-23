@@ -1,13 +1,10 @@
-﻿using Core.Data.MongoDb;
-using Core.Data.MongoDb.Attributes;
+﻿using Core.Data.Sql;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace UserRegistration.Entities
 {
-    [BsonCollection("emailVerifications")]
-    public class EmailVerification : Document
+
+    public class EmailVerification : Entity<string>
     {
         public string Username { get; set; }
         public string Email { get; set; }

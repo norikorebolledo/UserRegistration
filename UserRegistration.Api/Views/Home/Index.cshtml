@@ -1,7 +1,7 @@
 ﻿<h1>User Registration API</h1>
 
-@*For signalr testing*@
-@*<div class="container">
+
+<div class="container">
     <div class="row">&nbsp;</div>
     <div class="row">
         <div class="col-2">Username</div>
@@ -32,46 +32,49 @@
 
     </div>
 </div>
-<script src="~/lib/jquery/jquery.min.js"></script>
-<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 <script src="~/lib/jsSHA-3.1.2/sha.js"></script>
-<script>
-    var connection = new signalR.HubConnectionBuilder().withUrl("/accountHub").build();
-
-    //Disable send button until connection is established
+<script language="javascript" type="text/javascript">
+    var uri = "ws://" + window.location.host + "/ws";
     document.getElementById("register").disabled = true;
+    debugger
+    function connect() {
+        socket = new WebSocket(uri);
+        socket.onopen = function (event) {
+            console.log("opened connection to " + uri);
 
-    connection.start().then(function () {
-        document.getElementById("register").disabled = false;
-    }).catch(function (err) {
-        return console.error(err.toString());
-    });
+            document.getElementById("register").disabled = false;
+            document.getElementById("register").addEventListener("click", function () {
+                debugger
+                var username = document.getElementById("usernameInput").value;
+                var password = document.getElementById("passwordInput").value;
+                var email = document.getElementById("emailInput").value;
 
-    connection.on("registerResponse", function (data) {
-        debugger
-        document.getElementById("responseContainer").innerHTML = data;
-    });
+                var shaObj = new jsSHA("SHA-256", "TEXT");
+                shaObj.setHMACKey(password, "TEXT");
+                shaObj.update(username);
+                var hashedPassword = shaObj.getHMAC("HEX");
 
-    document.getElementById("register").addEventListener("click", function (event) {
-        debugger
-        var username = document.getElementById("usernameInput").value;
-        var password = document.getElementById("passwordInput").value;
-        var email = document.getElementById("emailInput").value;
+                socket.send(JSON.stringify({
+                    command: 'register',
+                    username: username,
+                    password: hashedPassword,
+                    email: email
+                }));
+            });
+        };
+        socket.onclose = function (event) {
+            console.log("closed connection from " + uri);
+        };
+        socket.onmessage = function (event) {
+            console.log(event.data);
+            document.getElementById("responseContainer").innerHTML = event.data;
+        };
+        socket.onerror = function (event) {
+            console.log("error: " + event.data);
+        };
+    }
+    connect();
 
-        var shaObj = new jsSHA("SHA-256", "TEXT");
-        shaObj.setHMACKey(password, "TEXT");
-        shaObj.update(username);
-        var hashedPassword = shaObj.getHMAC("HEX");
 
-        connection.invoke("register", {
-            command: 'register',
-            username: username,
-            password: hashedPassword,
-            email: email
-        }).catch(function (err) {
-            return console.error(err.toString());
-        });
-        event.preventDefault();
-    });
 
-</script>*@
+</script>

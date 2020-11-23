@@ -1,13 +1,13 @@
 using Core.Common.Helpers;
 using Core.Common.Mail;
-using Core.Data.MongoDb;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Threading.Tasks;
-using UserRegistration.Data;
 using UserRegistration.Data.Contracts;
+using UserRegistration.Data.Sql;
+using UserRegistration.Data.Sql.Repositories;
 using UserRegistration.Models;
 using UserRegistration.Models.Settings;
 using UserRegistration.Service.Contracts;
@@ -44,8 +44,9 @@ namespace UserRegistration.Service.Tests
             var mockHttpContext = new Mock<IHttpContextAccessor>();
 
             // Act
-            var userRepository = new UserRepository(new MongoDbSettings { ConnectionString = ConnectionString, DatabaseName = DatabaseName });
-            var emailVerificationRepository = new EmailVerificationRepository(new MongoDbSettings { ConnectionString = ConnectionString, DatabaseName = DatabaseName });
+            var dbContext = new DatabaseContext(null);
+            var userRepository = new UserRepository(dbContext);
+            var emailVerificationRepository = new EmailVerificationRepository(dbContext);
             var service = new AccountService(userRepository, mockSecuritySettings.Object, mockMailService.Object, mockHttpContext.Object, emailVerificationRepository, mockHelperService.Object);
 
             // Get email verification
@@ -87,7 +88,7 @@ namespace UserRegistration.Service.Tests
             var mockUserRepository = new Mock<IUserRepository>();
             var returnUser = new Entities.User();
             returnUser = null;
-            mockUserRepository.Setup(s => s.FindOneAsync(f => f.Username == loginSaltRequest.Username)).ReturnsAsync(returnUser);
+            mockUserRepository.Setup(s => s.FindAsync(f => f.Username == loginSaltRequest.Username)).ReturnsAsync(returnUser);
 
             var mockSecuritySettings = new Mock<IOptions<SecuritySettings>>();
             mockSecuritySettings.Setup(s => s.Value).Returns(new SecuritySettings
@@ -107,8 +108,9 @@ namespace UserRegistration.Service.Tests
             mockHttpContext.Setup(s => s.HttpContext.Session.Set("", null));
 
             // Act
-            var userRepository = new UserRepository(new MongoDbSettings { ConnectionString = ConnectionString, DatabaseName = DatabaseName });
-            var emailVerificationRepository = new EmailVerificationRepository(new MongoDbSettings { ConnectionString = ConnectionString, DatabaseName = DatabaseName });
+            var dbContext = new DatabaseContext(null);
+            var userRepository = new UserRepository(dbContext);
+            var emailVerificationRepository = new EmailVerificationRepository(dbContext);
             var service = new AccountService(userRepository, mockSecuritySettings.Object, mockMailService.Object, mockHttpContext.Object, emailVerificationRepository, mockHelperService.Object);
             var saltResponse = await service.GenerateSalt(loginSaltRequest);
 

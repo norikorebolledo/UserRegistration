@@ -3,7 +3,6 @@ using Core.Common.Mail;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using UserRegistration.Data.Contracts;
@@ -83,7 +82,7 @@ namespace UserRegistration.Service
                     DisplayName = model.DisplayName,
                     Password = hmacForSaving
                 };
-                await _userRepository.InsertOneAsync(entity);
+                await _userRepository.AddAsync(entity);
                 isSuccess = true;
             }
 
@@ -99,8 +98,8 @@ namespace UserRegistration.Service
         public async Task<LoginSaltResponse> GenerateSalt(LoginSaltRequest model)
         {
 
-            var emailVerification = _emailVerificationRepository.FindOneAsync(f => f.Username == model.Username && f.IsVerified);
-            var user = await _userRepository.FindOneAsync(f => f.Username == model.Username);
+            var emailVerification = _emailVerificationRepository.FindAsync(f => f.Username == model.Username && f.IsVerified);
+            var user = await _userRepository.FindAsync(f => f.Username == model.Username);
 
             if (emailVerification != null && user != null)
             {
@@ -108,7 +107,7 @@ namespace UserRegistration.Service
                 user.SaltValidity = _securitySettings.SaltValidityInSeconds;
                 user.SaltGenerationDate = DateTime.Now;
 
-                await _userRepository.ReplaceOneAsync(user);
+                await _userRepository.UpdateAsync(user);
 
                 return new LoginSaltResponse
                 {
@@ -139,7 +138,7 @@ namespace UserRegistration.Service
 
             if (isValid)
             {
-                var user = await _userRepository.FindOneAsync(f => f.Username == model.Username);
+                var user = await _userRepository.FindAsync(f => f.Username == model.Username);
 
                 if (user != null)
                 {
@@ -203,14 +202,14 @@ namespace UserRegistration.Service
             }
 
 
-            var emailVerification = await _emailVerificationRepository.FindOneAsync(f => f.Email == model.Email && f.Username == model.Username);
+            var emailVerification = await _emailVerificationRepository.FindAsync(f => f.Email == model.Email && f.Username == model.Username);
 
             if (emailVerification == null)
             {
                 emailVerification = new EmailVerification();
                 emailVerification.Username = model.Username;
                 emailVerification.Email = model.Email;
-                await _emailVerificationRepository.InsertOneAsync(emailVerification);
+                await _emailVerificationRepository.AddAsync(emailVerification);
             }
 
             // Check verification limit per day
@@ -245,7 +244,7 @@ namespace UserRegistration.Service
                         emailVerification.CodeSentDate = DateTime.Now;
                     }
 
-                    _emailVerificationRepository.ReplaceOne(emailVerification);
+                    await _emailVerificationRepository.UpdateAsync(emailVerification);
 
                     isSuccess = true;
                 }
@@ -266,12 +265,12 @@ namespace UserRegistration.Service
         public async Task<VerifyCodeResponse> Verify(VerifyCodeRequest model)
         {
             bool isSuccess = false;
-            var emailVerification = await _emailVerificationRepository.FindOneAsync(f => f.Email == model.Email);
+            var emailVerification = await _emailVerificationRepository.FindAsync(f => f.Email == model.Email);
 
             if (emailVerification != null && emailVerification.Code == model.Code)
             {
                 emailVerification.IsVerified = true;
-                _emailVerificationRepository.ReplaceOne(emailVerification);
+                await _emailVerificationRepository.UpdateAsync(emailVerification);
                 isSuccess = true;
             }
 
@@ -284,7 +283,7 @@ namespace UserRegistration.Service
 
         public async Task<CheckUsernameAvailabilityResponse> CheckUsername(CheckUsernameAvailabilityRequest model)
         {
-            var user = await _userRepository.FindOneAsync(f => f.Username == model.Username);
+            var user = await _userRepository.FindAsync(f => f.Username == model.Username);
 
             return new CheckUsernameAvailabilityResponse
             {
@@ -296,7 +295,7 @@ namespace UserRegistration.Service
 
         public async Task<CheckEmailAvailabilityResponse> CheckEmail(CheckEmailAvailabilityRequest model)
         {
-            var user = await _userRepository.FindOneAsync(f => f.Email == model.Email);
+            var user = await _userRepository.FindAsync(f => f.Email == model.Email);
 
             return new CheckEmailAvailabilityResponse
             {

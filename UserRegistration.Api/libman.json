@@ -2,14 +2,5 @@
   "version": "1.0",
   "defaultProvider": "cdnjs",
   "libraries": [
-    {
-      "provider": "unpkg",
-      "library": "@microsoft/signalr@latest",
-      "destination": "lib/microsoft/signalr/"
-    },
-    {
-      "library": "jquery@3.5.1",
-      "destination": "lib/jquery/"
-    }
   ]
 }

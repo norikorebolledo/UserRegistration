@@ -13,8 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using UserRegistration.Api.Areas.Backend.Hubs;
 using UserRegistration.Bootstrapper;
+using Core.WebSocket;
+using UserRegistration.Api.Areas.Backend.WS;
 
 namespace UserRegistration.Api
 {
@@ -35,16 +36,17 @@ namespace UserRegistration.Api
                 {
                     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                 });
-            services.AddSignalR();
 
             services.AddDistributedMemoryCache();
             services.AddSession();
+
+            services.AddWebSocketManager();
 
             services.RegisterService(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -52,6 +54,7 @@ namespace UserRegistration.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseWebSockets();          
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
@@ -65,12 +68,11 @@ namespace UserRegistration.Api
 
             app.UseSession();
             app.UseEndpoints(endpoints =>
-            {
-                
+            {                
                 endpoints.MapControllerRoute("areas", "{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapHub<AccountHub>("/accounthub");
             });
+            app.MapWebSocketManager("/ws", serviceProvider.GetService<AccountWebSocket>());
         }
     }
 }
