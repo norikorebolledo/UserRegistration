@@ -1,5 +1,10 @@
 # User Registration API 
 
+### Framework
+1. C#/ASP.NET Core
+2. Websockets API 
+3. EntityFramework Core
+4. FluentValidation
 
 ### Installation
 
@@ -31,5 +36,5 @@ but by default it was set to devmode to by pass the sending of email, you can ch
 
 ```
 
-#### Testing
+### Testing
 I have also added Testing UI in the root url of the site, as well as Unit Testing that uses InMemory Database
