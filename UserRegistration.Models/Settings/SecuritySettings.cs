@@ -10,5 +10,6 @@ namespace UserRegistration.Models.Settings
         public int SessionValidityInSeconds { get; set; }
         public int SaltValidityInSeconds { get; set; }
         public int VerificationLimitPerDay { get; set; }
+        public bool DevMode { get; set; }
     }
 }

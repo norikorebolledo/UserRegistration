@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Core.Common.Mail
+namespace Core.Common.Contracts.Mail
 {
     public class MailRequest
     {

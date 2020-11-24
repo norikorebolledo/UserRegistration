@@ -4,11 +4,8 @@ using System.Text;
 
 namespace UserRegistration.Models
 {
-    public class UserRegistrationResponse
+    public class UserRegistrationResponse : BaseResponse
     {
-        public string Command { get; set; }
         public string Username { get; set; }
-        public bool Success { get; set; }
-        public string Message { get; set; }
     }
 }

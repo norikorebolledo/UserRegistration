@@ -26,10 +26,10 @@ namespace UserRegistration.Models
         {
             public Validator()
             {
-                RuleFor(c => c.Username).NotNull();
-                RuleFor(c => c.Email).NotNull();
-                RuleFor(c => c.Password).NotNull();
-                RuleFor(c => c.VerificationCode).NotNull();
+                RuleFor(c => c.Username).NotEmpty().NotNull();
+                RuleFor(c => c.Email).NotEmpty().NotNull();
+                RuleFor(c => c.Password).NotEmpty().NotNull();
+                RuleFor(c => c.VerificationCode).NotEmpty().NotNull();
             }
         }
     }

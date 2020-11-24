@@ -4,9 +4,7 @@ using System.Text;
 
 namespace UserRegistration.Models
 {
-    public class VerifyCodeResponse
+    public class VerifyCodeResponse : BaseResponse
     {
-        public string Command { get; set; }
-        public bool Success { get; set; }
     }
 }

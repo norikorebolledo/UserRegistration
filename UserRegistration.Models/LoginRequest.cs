@@ -22,8 +22,8 @@ namespace UserRegistration.Models
         {
             public Validator()
             {
-                RuleFor(c => c.Username).NotNull();
-                RuleFor(c => c.Challenge).NotNull();
+                RuleFor(c => c.Username).NotEmpty().NotNull();
+                RuleFor(c => c.Challenge).NotEmpty().NotNull();
             }
         }
     }

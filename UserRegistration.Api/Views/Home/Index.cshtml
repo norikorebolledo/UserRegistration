@@ -1,6 +1,6 @@
 ﻿<h1>User Registration API</h1>
 
-
+<h3>Registration</h3>
 <div class="container">
     <div class="row">&nbsp;</div>
     <div class="row">
@@ -18,6 +18,16 @@
     <div class="row">&nbsp;</div>
     <div class="row">
         <div class="col-6">
+            <input type="button" id="verifyEmail" value="Verify Email" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2">Verification Code</div>
+        <div class="col-4"><input type="text" id="verificationCodeInput" /></div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-6">
             <input type="button" id="register" value="Register" />
         </div>
     </div>
@@ -27,38 +37,58 @@
         <hr />
     </div>
 </div>
+<h3>Login</h3>
+<div class="container">
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-2">Username</div>
+        <div class="col-4"><input type="text" value="johndoe" id="usernameLoginInput" /></div>
+    </div>
+    <div class="row">
+        <div class="col-2">Password</div>
+        <div class="col-4"><input type="text" value="somePassword" id="passwordLoginInput" /></div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-6">
+            <input type="button" id="login" value="Login" />
+        </div>
+    </div>
+</div>
 <div class="row">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <h3>Api Response</h3>
     <div class="col-6" id="responseContainer">
 
     </div>
 </div>
 <script src="~/lib/jsSHA-3.1.2/sha.js"></script>
 <script language="javascript" type="text/javascript">
-    var uri = "ws://" + window.location.host + "/ws";
+    var uri = "wss://" + window.location.host + "/ws";
     document.getElementById("register").disabled = true;
-    debugger
     function connect() {
-        socket = new WebSocket(uri);
+        var socket = new WebSocket(uri);
         socket.onopen = function (event) {
             console.log("opened connection to " + uri);
 
             document.getElementById("register").disabled = false;
             document.getElementById("register").addEventListener("click", function () {
-                debugger
                 var username = document.getElementById("usernameInput").value;
                 var password = document.getElementById("passwordInput").value;
                 var email = document.getElementById("emailInput").value;
-
-                var shaObj = new jsSHA("SHA-256", "TEXT");
-                shaObj.setHMACKey(password, "TEXT");
-                shaObj.update(username);
-                var hashedPassword = shaObj.getHMAC("HEX");
+                var verificationCode = document.getElementById("verificationCodeInput").value;
+                var hashedPassword = hash(password, username);
 
                 socket.send(JSON.stringify({
                     command: 'register',
                     username: username,
                     password: hashedPassword,
-                    email: email
+                    email: email,
+                    verificationCode: verificationCode
                 }));
             });
         };
@@ -73,8 +103,76 @@
             console.log("error: " + event.data);
         };
     }
+
+    function hash(key, message) {
+        var shaObj = new jsSHA("SHA-256", "TEXT");
+        shaObj.setHMACKey(key, "TEXT");
+        shaObj.update(message);
+        return shaObj.getHMAC("HEX");
+    }
+
+    function ajaxPost(url, data, callback) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (callback)
+                callback(this);
+        };
+        xhttp.open("POST", url, true);
+        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhttp.send(JSON.stringify(data));
+    }
+    function verifyEmail() {
+        var username = document.getElementById("usernameInput").value;
+        var email = document.getElementById("emailInput").value;
+        ajaxPost("/backend/backend/emailVerification", {
+            command: "verification",
+            email: email, username: username
+        }, function (r) {
+            if (r.readyState == 4 && r.status == 200) {
+                document.getElementById("responseContainer").innerHTML = r.responseText;
+            }
+        });
+    }
+
+    function login() {
+        var username = document.getElementById("usernameLoginInput").value;
+        var password = document.getElementById("passwordLoginInput").value;
+        ajaxPost("/backend/backend/loginSalt", {
+            command: "loginSalt",
+            username: username,
+            password: password
+        }, function (r) {
+            if (r.readyState == 4 && r.status == 200) {
+                document.getElementById("responseContainer").innerHTML = r.responseText;
+                var response = JSON.parse(r.responseText);
+
+                if (response.success) {
+                    var hashedPassword = hash(password, username);
+                    var hmac = hash('superSecretKey', hashedPassword);
+                    var challenge = hash(response.salt, hmac);
+
+                    ajaxPost("/backend/backend/login", {
+                        command: 'login',
+                        username: username,
+                        challenge: challenge
+                    }, function (resp) {
+                            if (resp.readyState == 4 && resp.status == 200) {
+                                document.getElementById("responseContainer").innerHTML = resp.responseText;
+                            }
+                    });
+                }
+            }
+        });
+    }
+
     connect();
 
+    document.getElementById("verifyEmail").addEventListener("click", function () {
+        verifyEmail();
+    });
 
+    document.getElementById("login").addEventListener("click", function () {
+        login();
+    });
 
 </script>

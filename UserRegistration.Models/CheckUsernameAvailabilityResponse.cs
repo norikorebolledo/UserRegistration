@@ -4,9 +4,8 @@ using System.Text;
 
 namespace UserRegistration.Models
 {
-    public class CheckUsernameAvailabilityResponse
+    public class CheckUsernameAvailabilityResponse : BaseResponse
     {
-        public string Command { get; set; }
         public string Username { get; set; }
         public bool Available { get; set; }
     }

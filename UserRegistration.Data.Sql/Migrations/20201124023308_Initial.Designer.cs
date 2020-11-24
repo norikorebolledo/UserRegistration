@@ -10,7 +10,7 @@ using UserRegistration.Data.Sql;
 namespace UserRegistration.Data.Sql.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20201123041103_Initial")]
+    [Migration("20201124023308_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,7 @@ namespace UserRegistration.Data.Sql.Migrations
             modelBuilder.Entity("UserRegistration.Entities.EmailVerification", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Code")
@@ -55,6 +56,7 @@ namespace UserRegistration.Data.Sql.Migrations
             modelBuilder.Entity("UserRegistration.Entities.User", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")

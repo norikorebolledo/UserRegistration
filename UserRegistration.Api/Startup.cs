@@ -54,7 +54,8 @@ namespace UserRegistration.Api
             }
 
             app.UseHttpsRedirection();
-            app.UseWebSockets();          
+            app.UseWebSockets();
+            app.MapWebSocketManager("/ws", serviceProvider.GetService<AccountWebSocket>());
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
@@ -72,7 +73,7 @@ namespace UserRegistration.Api
                 endpoints.MapControllerRoute("areas", "{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
-            app.MapWebSocketManager("/ws", serviceProvider.GetService<AccountWebSocket>());
+           
         }
     }
 }

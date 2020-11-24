@@ -11,6 +11,7 @@ namespace Core.Data.Sql
     public interface IEntity<TId> : IEntity
     {
         TId Id { get; set; }
+        public DateTime CreatedDate { get; set; }
 
     }
 }

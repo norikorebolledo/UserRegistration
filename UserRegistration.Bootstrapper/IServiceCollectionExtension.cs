@@ -1,4 +1,5 @@
-﻿using Core.Common.Mail;
+﻿using Core.Common.Contracts.Mail;
+using Core.Common.Mail;
 using Core.Data.MongoDb;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,8 @@ namespace UserRegistration.Bootstrapper
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IMailService, MailService>();
+            services.AddSingleton<IHelperService, HelperService>();
 
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.Configure<SecuritySettings>(configuration.GetSection("SecuritySettings"));
@@ -30,9 +33,9 @@ namespace UserRegistration.Bootstrapper
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IEmailVerificationRepository, EmailVerificationRepository>();
 
-            services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<IMailService, MailService>();
-            services.AddScoped<IHelperService, HelperService>();
+            services.AddScoped<ILoginService, LoginService>();
+            services.AddScoped<IAuthService, AuthService>();
+           
 
             return services;
         }

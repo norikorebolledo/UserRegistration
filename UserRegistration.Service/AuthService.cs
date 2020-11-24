@@ -1,8 +1,8 @@
-﻿using Core.Common.Helpers;
-using Core.Common.Mail;
-using Microsoft.AspNetCore.Http;
+﻿using Core.Common.Contracts.Mail;
+using Core.Common.Helpers;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using UserRegistration.Data.Contracts;
@@ -13,30 +13,25 @@ using UserRegistration.Service.Contracts;
 
 namespace UserRegistration.Service
 {
-    public class AccountService : IAccountService
+    public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
         private readonly SecuritySettings _securitySettings;
-        private readonly IMailService _mailService;
-        private readonly IHttpContextAccessor _httpContext;
-        private readonly IEmailVerificationRepository _emailVerificationRepository;
         private readonly IHelperService _helperService;
-
-        public AccountService(IUserRepository userRepository,
-            IOptions<SecuritySettings> securitySettings,
-            IMailService mailService, IHttpContextAccessor httpContext,
-            IEmailVerificationRepository emailVerificationRepository,
-            IHelperService helperService)
+        private readonly IEmailVerificationRepository _emailVerificationRepository;
+        private readonly IMailService _mailService;
+        public AuthService(IUserRepository userRepository,
+             IOptions<SecuritySettings> securitySettings,
+             IHelperService helperService,
+             IEmailVerificationRepository emailVerificationRepository,
+             IMailService mailService)
         {
             _userRepository = userRepository;
             _securitySettings = securitySettings.Value;
-            _mailService = mailService;
-            _httpContext = httpContext;
-            _emailVerificationRepository = emailVerificationRepository;
             _helperService = helperService;
+            _emailVerificationRepository = emailVerificationRepository;
+            _mailService = mailService;
         }
-
-
         public async Task<UserRegistrationResponse> Register(UserRegistrationRequest model)
         {
 
@@ -95,100 +90,6 @@ namespace UserRegistration.Service
             };
         }
 
-        public async Task<LoginSaltResponse> GenerateSalt(LoginSaltRequest model)
-        {
-
-            var emailVerification = _emailVerificationRepository.FindAsync(f => f.Username == model.Username && f.IsVerified);
-            var user = await _userRepository.FindAsync(f => f.Username == model.Username);
-
-            if (emailVerification != null && user != null)
-            {
-                user.Salt = SecurityHelper.RandomString(64);
-                user.SaltValidity = _securitySettings.SaltValidityInSeconds;
-                user.SaltGenerationDate = DateTime.Now;
-
-                await _userRepository.UpdateAsync(user);
-
-                return new LoginSaltResponse
-                {
-                    Command = "loginSalt",
-                    Username = user.Username,
-                    Validity = user.SaltValidity,
-                    Salt = user.Salt
-                };
-            }
-
-            return new LoginSaltResponse
-            {
-                Success = false,
-                Message = "User not found"
-            };
-
-        }
-
-        public async Task<LoginResponse> Login(LoginRequest model)
-        {
-            bool isValid = true;
-            string message = string.Empty;
-            if (model.IsInvalid())
-            {
-                message = string.Join(',', model.GetErrors());
-                isValid = false;
-            }
-
-            if (isValid)
-            {
-                var user = await _userRepository.FindAsync(f => f.Username == model.Username);
-
-                if (user != null)
-                {
-                    if (user.SaltGenerationDate.HasValue && DateTime.Now > user.SaltGenerationDate.Value.ToLocalTime().AddSeconds(user.SaltValidity))
-                    {
-                        return new LoginResponse
-                        {
-                            Command = "login",
-                            Success = false,
-                            Message = "Salt expired"
-                        };
-                    }
-
-                    var challenge = SecurityHelper.ComputeHash(user.Salt, user.Password);
-
-                    if (challenge != model.Challenge)
-                    {
-                        return new LoginResponse
-                        {
-                            Command = "login",
-                            Success = false,
-                            Message = "Challenge is not valid"
-                        };
-                    }
-
-                    string sessionId = Guid.NewGuid().ToString();
-                    _httpContext.HttpContext.Session.Set("sessionID", Encoding.UTF8.GetBytes(sessionId));
-                    _httpContext.HttpContext.Session.Set("sessionStarted", Encoding.UTF8.GetBytes(DateTime.Now.ToString()));
-
-                    return new LoginResponse
-                    {
-                        Command = "login",
-                        SessionID = sessionId,
-                        Success = true,
-                        UserID = user.Id.ToString(),
-                        Username = user.Username,
-                        Validity = _securitySettings.SessionValidityInSeconds
-                    };
-
-                }
-            }
-
-            return new LoginResponse
-            {
-                Command = "login",
-                Success = false,
-                Message = message
-            };
-        }
-
         public async Task<VerificationResponse> SendVerificationCode(VerificationRequest model)
         {
             bool isSuccess = false;
@@ -215,6 +116,7 @@ namespace UserRegistration.Service
             // Check verification limit per day
             if (emailVerification.CodeSentDate.HasValue && emailVerification.CodeSentDate.Value.Date == DateTime.Now.Date && emailVerification.Counter >= _securitySettings.VerificationLimitPerDay)
             {
+                message = "You reached the limit of verifying email";
                 isValid = false;
             }
 
@@ -226,12 +128,20 @@ namespace UserRegistration.Service
                     string code = _helperService.RandomString(6);
                     string body = $"Your verification code is {code}";
 
-                    await _mailService.SendEmailAsync(new MailRequest
+                    if (_securitySettings.DevMode)
                     {
-                        Subject = "Verify Account",
-                        ToEmail = emailVerification.Email,
-                        Body = body
-                    });
+                        message = body;
+
+                    }
+                    else
+                    {
+                        await _mailService.SendEmailAsync(new MailRequest
+                        {
+                            Subject = "Verify Account",
+                            ToEmail = emailVerification.Email,
+                            Body = body
+                        });
+                    }
 
                     emailVerification.Code = code;
                     if (emailVerification.Counter > 0)
@@ -248,8 +158,9 @@ namespace UserRegistration.Service
 
                     isSuccess = true;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    message = "Something wrong while sending email";
                     // Log
                 }
             }
@@ -261,7 +172,6 @@ namespace UserRegistration.Service
                 Message = message
             };
         }
-
         public async Task<VerifyCodeResponse> Verify(VerifyCodeRequest model)
         {
             bool isSuccess = false;
@@ -280,7 +190,6 @@ namespace UserRegistration.Service
                 Success = isSuccess
             };
         }
-
         public async Task<CheckUsernameAvailabilityResponse> CheckUsername(CheckUsernameAvailabilityRequest model)
         {
             var user = await _userRepository.FindAsync(f => f.Username == model.Username);
@@ -292,7 +201,6 @@ namespace UserRegistration.Service
                 Available = user == null
             };
         }
-
         public async Task<CheckEmailAvailabilityResponse> CheckEmail(CheckEmailAvailabilityRequest model)
         {
             var user = await _userRepository.FindAsync(f => f.Email == model.Email);
@@ -304,5 +212,6 @@ namespace UserRegistration.Service
                 Available = user == null
             };
         }
+
     }
 }

@@ -22,6 +22,7 @@ namespace UserRegistration.Data.Sql.Migrations
             modelBuilder.Entity("UserRegistration.Entities.EmailVerification", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Code")
@@ -53,6 +54,7 @@ namespace UserRegistration.Data.Sql.Migrations
             modelBuilder.Entity("UserRegistration.Entities.User", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")

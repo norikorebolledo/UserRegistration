@@ -1,4 +1,5 @@
 ﻿using Core.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,19 +14,16 @@ namespace UserRegistration.Api.Areas.Backend.WS
 {
     public class AccountWebSocket : WebSocketHandler
     {
-        //private readonly IAccountService _accountService;
-        public AccountWebSocket(WebSocketConnectionManager webSocketConnectionManager) //, IAccountService accountService) 
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        public AccountWebSocket(WebSocketConnectionManager webSocketConnectionManager, IServiceScopeFactory serviceScopeFactory)
             : base(webSocketConnectionManager)
         {
-           // _accountService = accountService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public override async Task OnConnected(WebSocket socket)
         {
             await base.OnConnected(socket);
-
-            var socketId = WebSocketConnectionManager.GetId(socket);
-            await SendMessageToAllAsync($"{socketId} is now connected");
         }
 
         public override async Task ReceiveAsync(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
@@ -34,9 +32,17 @@ namespace UserRegistration.Api.Areas.Backend.WS
             var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
             var model = JsonConvert.DeserializeObject<UserRegistrationRequest>(message);
 
-            //var response = _accountService.Register(model);
-
-            await SendMessageAsync(socketId, message);
+            if (model.Command == "register")
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var authService = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await authService.Register(model);
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                
+                
+            }
         }
     }
 }

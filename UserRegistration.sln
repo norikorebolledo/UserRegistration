@@ -35,7 +35,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserRegistration.Data.Sql",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Data.Sql", "Core.Data.Sql\Core.Data.Sql.csproj", "{80BF5A21-F041-43AE-AFEA-0BFF03B8A419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.WebSocket", "Core.WebSocket\Core.WebSocket.csproj", "{247D0BCB-B1B7-48B7-AD78-1301F37E2A4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.WebSocket", "Core.WebSocket\Core.WebSocket.csproj", "{247D0BCB-B1B7-48B7-AD78-1301F37E2A4D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Common.Contracts", "Core.Common.Contracts\Core.Common.Contracts.csproj", "{1FBC22F1-42BF-4C34-A43F-EA8463F8388A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Data.Contracts", "Core.Data.Contracts\Core.Data.Contracts.csproj", "{DC791675-0132-47F8-8DF5-A62CB5FD3F12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +99,14 @@ Global
 		{247D0BCB-B1B7-48B7-AD78-1301F37E2A4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{247D0BCB-B1B7-48B7-AD78-1301F37E2A4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{247D0BCB-B1B7-48B7-AD78-1301F37E2A4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FBC22F1-42BF-4C34-A43F-EA8463F8388A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FBC22F1-42BF-4C34-A43F-EA8463F8388A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FBC22F1-42BF-4C34-A43F-EA8463F8388A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FBC22F1-42BF-4C34-A43F-EA8463F8388A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC791675-0132-47F8-8DF5-A62CB5FD3F12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC791675-0132-47F8-8DF5-A62CB5FD3F12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC791675-0132-47F8-8DF5-A62CB5FD3F12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC791675-0132-47F8-8DF5-A62CB5FD3F12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +124,8 @@ Global
 		{8E438A47-5F50-41E6-9199-988262C004BF} = {31CA6D40-9345-4871-80D9-A891378BD49A}
 		{80BF5A21-F041-43AE-AFEA-0BFF03B8A419} = {A5B5041B-4D1D-443D-9656-FCDFA6811965}
 		{247D0BCB-B1B7-48B7-AD78-1301F37E2A4D} = {A5B5041B-4D1D-443D-9656-FCDFA6811965}
+		{1FBC22F1-42BF-4C34-A43F-EA8463F8388A} = {A5B5041B-4D1D-443D-9656-FCDFA6811965}
+		{DC791675-0132-47F8-8DF5-A62CB5FD3F12} = {A5B5041B-4D1D-443D-9656-FCDFA6811965}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4E8B3C60-1E40-4CB4-9DC2-214964ECACF4}

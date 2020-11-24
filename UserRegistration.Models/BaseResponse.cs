@@ -4,7 +4,10 @@ using System.Text;
 
 namespace UserRegistration.Models
 {
-    public class BaseResponse
+    public abstract class BaseResponse
     {
+        public string Message { get; set; }
+        public bool Success { get; set; }
+        public string Command { get; set; }
     }
 }

@@ -4,13 +4,10 @@ using System.Text;
 
 namespace UserRegistration.Models
 {
-    public class LoginSaltResponse
+    public class LoginSaltResponse : BaseResponse
     {
-        public string Command { get; set; }
         public string Username { get; set; }
         public int Validity { get; set; }
         public string Salt { get; set; }
-        public string Message { get; set; }
-        public bool Success { get; set; }
     }
 }

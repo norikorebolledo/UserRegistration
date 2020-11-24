@@ -20,7 +20,7 @@ namespace Core.WebSocket
             {
                 if (type.GetTypeInfo().BaseType == typeof(WebSocketHandler))
                 {
-                    services.AddSingleton(type);
+                    services.AddTransient(type);
                 }
             }
 

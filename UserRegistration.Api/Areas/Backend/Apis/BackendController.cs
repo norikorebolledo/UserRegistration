@@ -14,42 +14,45 @@ namespace UserRegistration.Api.Areas.Backend.Apis
     [ApiController]
     public class BackendController : ControllerBase
     {
-        private readonly IAccountService _accountService;
+        private readonly ILoginService _loginService;
+        private readonly IAuthService _authService;
 
-        public BackendController(IAccountService accountService)
+        public BackendController(ILoginService loginService,
+            IAuthService authService)
         {
-            _accountService = accountService;
+            _loginService = loginService;
+            _authService = authService;
         }
 
         [HttpPost("checkUsername")]
         public async Task<IActionResult> CheckUsername(CheckUsernameAvailabilityRequest model)
         {
-            return Ok(await _accountService.CheckUsername(model));
+            return Ok(await _authService.CheckUsername(model));
         }
 
         [HttpPost("checkEmail")]
         public async Task<IActionResult> CheckEmail(CheckEmailAvailabilityRequest model)
         {
-            return Ok(await _accountService.CheckEmail(model));
+            return Ok(await _authService.CheckEmail(model));
         }
 
 
         [HttpPost("loginSalt")]
         public async Task<IActionResult> GenerateSalt(LoginSaltRequest model)
         {
-            return Ok(await _accountService.GenerateSalt(model));
+            return Ok(await _loginService.GenerateSalt(model));
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest model)
         {
-            return Ok(await _accountService.Login(model));
+            return Ok(await _loginService.Login(model));
         }
 
         [HttpPost("emailVerification")]
         public async Task<IActionResult> EmailVerication(VerificationRequest model)
         {
-            return Ok(await _accountService.SendVerificationCode(model));
+            return Ok(await _authService.SendVerificationCode(model));
         }
 
 

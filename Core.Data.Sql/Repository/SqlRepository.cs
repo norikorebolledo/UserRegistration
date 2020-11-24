@@ -33,17 +33,19 @@ namespace Core.Data.Sql.Repository
         public async Task DeleteAsync(string id)
         {
             var entity = await FindAsync(id);
-            Delete(entity);
+            await DeleteAsync(entity);
         }
 
         public void Delete(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
+            _context.SaveChanges();
         }
 
-        public Task DeleteAsync(TEntity entity)
+        public async Task DeleteAsync(TEntity entity)
         {
-            throw new NotImplementedException();
+            _context.Set<TEntity>().Remove(entity);
+            await _context.SaveChangesAsync();
         }
 
         public IEnumerable<TEntity> FilterBy(Expression<Func<TEntity, bool>> filterExpression)
@@ -79,11 +81,13 @@ namespace Core.Data.Sql.Repository
         public void Add(TEntity entity)
         {
             _context.Set<TEntity>().Add(entity);
+            _context.SaveChanges();
         }
 
         public async Task AddAsync(TEntity entity)
         {
             await _context.Set<TEntity>().AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         public void Update(TEntity entity)
@@ -92,9 +96,10 @@ namespace Core.Data.Sql.Repository
             _context.Entry(entity).State = EntityState.Modified;
         }
 
-        public Task UpdateAsync(TEntity entity)
+        public async Task UpdateAsync(TEntity entity)
         {
-            throw new NotImplementedException();
+            Update(entity);
+            await _context.SaveChangesAsync();
         }
     }
 }
