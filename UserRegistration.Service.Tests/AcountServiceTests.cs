@@ -1,4 +1,5 @@
 using Core.Common.Contracts.Mail;
+using Core.Common.Date;
 using Core.Common.Helpers;
 using Core.Common.Mail;
 using Microsoft.AspNetCore.Http;
@@ -88,7 +89,7 @@ namespace UserRegistration.Service.Tests
                 loginSaltRequest.Command = "loginSalt";
                 loginSaltRequest.Username = username;
 
-                var loginService = new LoginService(userRepository, mockSecuritySettings.Object, mockHttpContext.Object, emailVerificationRepository, new HelperService());
+                var loginService = new LoginService(userRepository, mockSecuritySettings.Object, mockHttpContext.Object, emailVerificationRepository, new HelperService(), new AppDateTime());
                 var saltResponse = await loginService.GenerateSalt(loginSaltRequest);
 
                 var hashedPassword = SecurityHelper.ComputeHash(plainTextPassword, loginSaltRequest.Username);

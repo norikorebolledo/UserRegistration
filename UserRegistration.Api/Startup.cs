@@ -55,7 +55,7 @@ namespace UserRegistration.Api
 
             app.UseHttpsRedirection();
             app.UseWebSockets();
-            app.MapWebSocketManager("/ws", serviceProvider.GetService<AccountWebSocket>());
+           
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(
@@ -68,6 +68,7 @@ namespace UserRegistration.Api
 
 
             app.UseSession();
+            app.MapWebSocketManager("/ws", serviceProvider.GetService<AccountWebSocket>());
             app.UseEndpoints(endpoints =>
             {                
                 endpoints.MapControllerRoute("areas", "{area:exists}/{controller=Home}/{action=Index}/{id?}");

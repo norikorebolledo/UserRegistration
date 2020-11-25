@@ -1,4 +1,5 @@
-﻿using Core.Common.Contracts.Mail;
+﻿using Core.Common.Contracts.Date;
+using Core.Common.Contracts.Mail;
 using Core.Common.Helpers;
 using Core.Common.Mail;
 using Microsoft.AspNetCore.Http;
@@ -21,18 +22,21 @@ namespace UserRegistration.Service
         private readonly IHttpContextAccessor _httpContext;
         private readonly IEmailVerificationRepository _emailVerificationRepository;
         private readonly IHelperService _helperService;
+        private readonly IDateTime _dateTime;
 
         public LoginService(IUserRepository userRepository,
             IOptions<SecuritySettings> securitySettings,
             IHttpContextAccessor httpContext,
             IEmailVerificationRepository emailVerificationRepository,
-            IHelperService helperService)
+            IHelperService helperService,
+            IDateTime dateTime)
         {
             _userRepository = userRepository;
             _securitySettings = securitySettings.Value;
             _httpContext = httpContext;
             _emailVerificationRepository = emailVerificationRepository;
             _helperService = helperService;
+            _dateTime = dateTime;
         }
 
 
@@ -98,7 +102,7 @@ namespace UserRegistration.Service
 
                 if (user != null)
                 {
-                    if (user.SaltGenerationDate.HasValue && DateTime.Now > user.SaltGenerationDate.Value.ToLocalTime().AddSeconds(user.SaltValidity))
+                    if (user.SaltGenerationDate.HasValue && _dateTime.UtcNow > user.SaltGenerationDate.Value.AddSeconds(_securitySettings.SaltValidityInSeconds))
                     {
                         return new LoginResponse
                         {
@@ -108,7 +112,7 @@ namespace UserRegistration.Service
                         };
                     }
 
-                    var challenge = SecurityHelper.ComputeHash(user.Salt, user.Password);
+                    var challenge = _helperService.ComputeHash(user.Salt, user.Password);
 
                     if (challenge != model.Challenge)
                     {
@@ -121,8 +125,6 @@ namespace UserRegistration.Service
                     }
 
                     string sessionId = Guid.NewGuid().ToString();
-                    _httpContext.HttpContext.Session.Set("sessionID", Encoding.UTF8.GetBytes(sessionId));
-                    _httpContext.HttpContext.Session.Set("sessionStarted", Encoding.UTF8.GetBytes(DateTime.Now.ToString()));
 
                     return new LoginResponse
                     {

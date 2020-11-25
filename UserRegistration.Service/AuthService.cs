@@ -167,7 +167,7 @@ namespace UserRegistration.Service
 
             return new VerificationResponse
             {
-                Command = "verification",
+                Command = "emailVerification",
                 Success = isSuccess,
                 Message = message
             };
@@ -207,7 +207,7 @@ namespace UserRegistration.Service
 
             return new CheckEmailAvailabilityResponse
             {
-                Command = "checkUsername",
+                Command = "checkEmail",
                 Email = model.Email,
                 Available = user == null
             };

@@ -12,5 +12,10 @@ namespace UserRegistration.Service
         {
             return SecurityHelper.RandomString(length);
         }
+
+        public string ComputeHash(string key, string message)
+        {
+            return SecurityHelper.ComputeHash(key, message);
+        }
     }
 }

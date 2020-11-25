@@ -68,111 +68,111 @@
 </div>
 <script src="~/lib/jsSHA-3.1.2/sha.js"></script>
 <script language="javascript" type="text/javascript">
-    var uri = "wss://" + window.location.host + "/ws";
-    document.getElementById("register").disabled = true;
-    function connect() {
+    (function () {
+
+        var uri = "wss://" + window.location.host + "/ws";
         var socket = new WebSocket(uri);
-        socket.onopen = function (event) {
-            console.log("opened connection to " + uri);
+        document.getElementById("register").disabled = true;
+        document.getElementById("login").disabled = true;
+        document.getElementById("verifyEmail").disabled = true;
 
-            document.getElementById("register").disabled = false;
-            document.getElementById("register").addEventListener("click", function () {
-                var username = document.getElementById("usernameInput").value;
-                var password = document.getElementById("passwordInput").value;
-                var email = document.getElementById("emailInput").value;
-                var verificationCode = document.getElementById("verificationCodeInput").value;
-                var hashedPassword = hash(password, username);
+        function connect() {
 
-                socket.send(JSON.stringify({
-                    command: 'register',
-                    username: username,
-                    password: hashedPassword,
-                    email: email,
-                    verificationCode: verificationCode
-                }));
-            });
-        };
-        socket.onclose = function (event) {
-            console.log("closed connection from " + uri);
-        };
-        socket.onmessage = function (event) {
-            console.log(event.data);
-            document.getElementById("responseContainer").innerHTML = event.data;
-        };
-        socket.onerror = function (event) {
-            console.log("error: " + event.data);
-        };
-    }
+            socket.onopen = function (event) {
+                console.log("opened connection to " + uri);
+                document.getElementById("register").disabled = false;
+                document.getElementById("register").addEventListener("click", function () {
+                    register();
+                });
+                document.getElementById("login").disabled = false;
+                document.getElementById("login").addEventListener("click", function () {
+                    requestLoginSalt();
+                });
+                document.getElementById("verifyEmail").disabled = false;
+                document.getElementById("verifyEmail").addEventListener("click", function () {
+                    verifyEmail();
+                });
+            };
+            socket.onclose = function (event) {
+                console.log("closed connection from " + uri);
+            };
+            socket.onmessage = function (event) {
+                console.log(event.data);
+                document.getElementById("responseContainer").innerHTML = event.data;
+                var response = JSON.parse(event.data);
 
-    function hash(key, message) {
-        var shaObj = new jsSHA("SHA-256", "TEXT");
-        shaObj.setHMACKey(key, "TEXT");
-        shaObj.update(message);
-        return shaObj.getHMAC("HEX");
-    }
-
-    function ajaxPost(url, data, callback) {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (callback)
-                callback(this);
-        };
-        xhttp.open("POST", url, true);
-        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhttp.send(JSON.stringify(data));
-    }
-    function verifyEmail() {
-        var username = document.getElementById("usernameInput").value;
-        var email = document.getElementById("emailInput").value;
-        ajaxPost("/backend/backend/emailVerification", {
-            command: "verification",
-            email: email, username: username
-        }, function (r) {
-            if (r.readyState == 4 && r.status == 200) {
-                document.getElementById("responseContainer").innerHTML = r.responseText;
-            }
-        });
-    }
-
-    function login() {
-        var username = document.getElementById("usernameLoginInput").value;
-        var password = document.getElementById("passwordLoginInput").value;
-        ajaxPost("/backend/backend/loginSalt", {
-            command: "loginSalt",
-            username: username,
-            password: password
-        }, function (r) {
-            if (r.readyState == 4 && r.status == 200) {
-                document.getElementById("responseContainer").innerHTML = r.responseText;
-                var response = JSON.parse(r.responseText);
-
-                if (response.success) {
-                    var hashedPassword = hash(password, username);
-                    var hmac = hash('superSecretKey', hashedPassword);
-                    var challenge = hash(response.salt, hmac);
-
-                    ajaxPost("/backend/backend/login", {
-                        command: 'login',
-                        username: username,
-                        challenge: challenge
-                    }, function (resp) {
-                            if (resp.readyState == 4 && resp.status == 200) {
-                                document.getElementById("responseContainer").innerHTML = resp.responseText;
-                            }
-                    });
+                if (response.Command == 'loginSalt') {
+                    login(response);
                 }
+
+            };
+            socket.onerror = function (event) {
+                console.log("error: " + event.data);
+            };
+        }
+
+        function register() {
+            var username = document.getElementById("usernameInput").value;
+            var password = document.getElementById("passwordInput").value;
+            var email = document.getElementById("emailInput").value;
+            var verificationCode = document.getElementById("verificationCodeInput").value;
+            var hashedPassword = hash(password, username);
+
+            socket.send(JSON.stringify({
+                command: 'register',
+                username: username,
+                password: hashedPassword,
+                email: email,
+                verificationCode: verificationCode
+            }));
+        }
+
+        function requestLoginSalt() {
+            var username = document.getElementById("usernameLoginInput").value;
+            var password = document.getElementById("passwordLoginInput").value;
+            socket.send(JSON.stringify({
+                command: "loginSalt",
+                username: username,
+                password: password
+            }));
+        }
+
+        function login(response) {
+            if (response.Success) {
+                var username = document.getElementById("usernameLoginInput").value;
+                var password = document.getElementById("passwordLoginInput").value;
+                var hashedPassword = hash(password, username);
+                var hmac = hash('superSecretKey', hashedPassword);
+                var challenge = hash(response.Salt, hmac);
+                socket.send(JSON.stringify({
+                    command: 'login',
+                    username: username,
+                    challenge: challenge
+                }));
             }
-        });
-    }
+        }
 
-    connect();
+        function hash(key, message) {
+            var shaObj = new jsSHA("SHA-256", "TEXT");
+            shaObj.setHMACKey(key, "TEXT");
+            shaObj.update(message);
+            return shaObj.getHMAC("HEX");
+        }
 
-    document.getElementById("verifyEmail").addEventListener("click", function () {
-        verifyEmail();
-    });
+        function verifyEmail() {
+            var username = document.getElementById("usernameInput").value;
+            var email = document.getElementById("emailInput").value;
 
-    document.getElementById("login").addEventListener("click", function () {
-        login();
-    });
+            socket.send(JSON.stringify({
+                command: "emailVerification",
+                email: email, username: username
+            }));
+        }
+
+        connect();
+
+    })();
+
+
 
 </script>

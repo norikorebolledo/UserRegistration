@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,19 +32,62 @@ namespace UserRegistration.Api.Areas.Backend.WS
         {
             var socketId = WebSocketConnectionManager.GetId(socket);
             var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-            var model = JsonConvert.DeserializeObject<UserRegistrationRequest>(message);
+            dynamic model = JsonConvert.DeserializeObject<ExpandoObject>(message);
 
-            if (model.Command == "register")
+            using (var scope = _serviceScopeFactory.CreateScope())
             {
-                using (var scope = _serviceScopeFactory.CreateScope())
+                if (model.command == "register")
                 {
-                    var authService = scope.ServiceProvider.GetService<IAuthService>();
-                    var response = await authService.Register(model);
+                    var service = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await service.Register(JsonConvert.DeserializeObject<UserRegistrationRequest>(message));
                     await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
                 }
-                
-                
+                else if (model.command == "loginSalt")
+                {
+                    var service = scope.ServiceProvider.GetService<ILoginService>();
+                    var response = await service.GenerateSalt(JsonConvert.DeserializeObject<LoginSaltRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                else if (model.command == "login")
+                {
+                    var service = scope.ServiceProvider.GetService<ILoginService>();
+                    var response = await service.Login(JsonConvert.DeserializeObject<LoginRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                else if (model.command == "register")
+                {
+                    var service = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await service.Register(JsonConvert.DeserializeObject<UserRegistrationRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                else if (model.command == "emailVerification")
+                {
+                    var service = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await service.SendVerificationCode(JsonConvert.DeserializeObject<VerificationRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                else if (model.command == "verification")
+                {
+                    var service = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await service.SendVerificationCode(JsonConvert.DeserializeObject<VerificationRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                else if (model.command == "checkUsername")
+                {
+                    var service = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await service.CheckUsername(JsonConvert.DeserializeObject<CheckUsernameAvailabilityRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
+                else if (model.command == "checkEmail")
+                {
+                    var service = scope.ServiceProvider.GetService<IAuthService>();
+                    var response = await service.CheckEmail(JsonConvert.DeserializeObject<CheckEmailAvailabilityRequest>(message));
+                    await SendMessageAsync(socketId, JsonConvert.SerializeObject(response));
+                }
             }
+
         }
+
+
     }
 }
