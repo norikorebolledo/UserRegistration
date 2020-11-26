@@ -3,7 +3,7 @@
 ### Framework
 1. C#/ASP.NET Core
 2. Websockets API 
-3. EntityFramework Core
+3. EntityFramework Core (SQL Server DB Provider)
 4. FluentValidation
 
 ### Installation

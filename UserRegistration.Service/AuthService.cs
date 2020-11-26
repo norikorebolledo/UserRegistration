@@ -1,4 +1,5 @@
-﻿using Core.Common.Contracts.Mail;
+﻿using Core.Common.Contracts.Date;
+using Core.Common.Contracts.Mail;
 using Core.Common.Helpers;
 using Microsoft.Extensions.Options;
 using System;
@@ -20,17 +21,21 @@ namespace UserRegistration.Service
         private readonly IHelperService _helperService;
         private readonly IEmailVerificationRepository _emailVerificationRepository;
         private readonly IMailService _mailService;
+        private readonly IDateTime _dateTime;
+
         public AuthService(IUserRepository userRepository,
              IOptions<SecuritySettings> securitySettings,
              IHelperService helperService,
              IEmailVerificationRepository emailVerificationRepository,
-             IMailService mailService)
+             IMailService mailService,
+             IDateTime dateTime)
         {
             _userRepository = userRepository;
             _securitySettings = securitySettings.Value;
             _helperService = helperService;
             _emailVerificationRepository = emailVerificationRepository;
             _mailService = mailService;
+            _dateTime = dateTime;
         }
         public async Task<UserRegistrationResponse> Register(UserRegistrationRequest model)
         {
@@ -50,6 +55,7 @@ namespace UserRegistration.Service
             if (isValid)
             {
                 var checkUser = await CheckUsername(new CheckUsernameAvailabilityRequest { Username = model.Username });
+                message = checkUser.Message;
                 isValid = checkUser.Available;
             }
 
@@ -57,12 +63,14 @@ namespace UserRegistration.Service
             if (isValid)
             {
                 var checkEmail = await CheckEmail(new CheckEmailAvailabilityRequest { Email = model.Email });
+                message = checkEmail.Message;
                 isValid = checkEmail.Available;
             }
 
             if (isValid)
             {
                 var verify = await Verify(new VerifyCodeRequest { Email = model.Email, Code = model.VerificationCode });
+                message = verify.Message;
                 isValid = verify.Success;
             }
 
@@ -89,7 +97,6 @@ namespace UserRegistration.Service
                 Message = message
             };
         }
-
         public async Task<VerificationResponse> SendVerificationCode(VerificationRequest model)
         {
             bool isSuccess = false;
@@ -102,8 +109,7 @@ namespace UserRegistration.Service
                 isValid = false;
             }
 
-
-            var emailVerification = await _emailVerificationRepository.FindAsync(f => f.Email == model.Email && f.Username == model.Username);
+            var emailVerification = await _emailVerificationRepository.FindAsync(f => f.Email == model.Email);
 
             if (emailVerification == null)
             {
@@ -114,7 +120,7 @@ namespace UserRegistration.Service
             }
 
             // Check verification limit per day
-            if (emailVerification.CodeSentDate.HasValue && emailVerification.CodeSentDate.Value.Date == DateTime.Now.Date && emailVerification.Counter >= _securitySettings.VerificationLimitPerDay)
+            if (emailVerification.CodeSentDate.HasValue && emailVerification.CodeSentDate.Value.Date == _dateTime.UtcNow.Date && emailVerification.Counter >= _securitySettings.VerificationLimitPerDay)
             {
                 message = "You reached the limit of verifying email";
                 isValid = false;
@@ -144,14 +150,14 @@ namespace UserRegistration.Service
                     }
 
                     emailVerification.Code = code;
-                    if (emailVerification.Counter > 0)
+                    if (emailVerification.Counter > 0 && emailVerification.CodeSentDate.Value.Date == _dateTime.UtcNow.Date)
                     {
-                        ++emailVerification.Counter;
+                        emailVerification.Counter++;
                     }
                     else
                     {
                         emailVerification.Counter = 1;
-                        emailVerification.CodeSentDate = DateTime.Now;
+                        emailVerification.CodeSentDate = _dateTime.UtcNow;
                     }
 
                     await _emailVerificationRepository.UpdateAsync(emailVerification);
@@ -175,6 +181,7 @@ namespace UserRegistration.Service
         public async Task<VerifyCodeResponse> Verify(VerifyCodeRequest model)
         {
             bool isSuccess = false;
+            string message = string.Empty;
             var emailVerification = await _emailVerificationRepository.FindAsync(f => f.Email == model.Email);
 
             if (emailVerification != null && emailVerification.Code == model.Code)
@@ -183,11 +190,16 @@ namespace UserRegistration.Service
                 await _emailVerificationRepository.UpdateAsync(emailVerification);
                 isSuccess = true;
             }
+            else
+            {
+                message = "Verification code not matched";
+            }
 
             return new VerifyCodeResponse
             {
                 Command = "verifyCode",
-                Success = isSuccess
+                Success = isSuccess,
+                Message = message
             };
         }
         public async Task<CheckUsernameAvailabilityResponse> CheckUsername(CheckUsernameAvailabilityRequest model)
@@ -198,7 +210,8 @@ namespace UserRegistration.Service
             {
                 Command = "checkUsername",
                 Username = model.Username,
-                Available = user == null
+                Available = user == null,
+                Message = user != null ? "User already taken" : string.Empty
             };
         }
         public async Task<CheckEmailAvailabilityResponse> CheckEmail(CheckEmailAvailabilityRequest model)
@@ -209,7 +222,8 @@ namespace UserRegistration.Service
             {
                 Command = "checkEmail",
                 Email = model.Email,
-                Available = user == null
+                Available = user == null,
+                Message = user != null ? "Email already taken" : string.Empty
             };
         }
 

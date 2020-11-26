@@ -38,10 +38,7 @@ namespace UserRegistration.Api
                 });
 
             services.AddDistributedMemoryCache();
-            services.AddSession();
-
             services.AddWebSocketManager();
-
             services.RegisterService(Configuration);
         }
 
@@ -65,9 +62,6 @@ namespace UserRegistration.Api
             app.UseRouting();
 
             app.UseAuthorization();
-
-
-            app.UseSession();
             app.MapWebSocketManager("/ws", serviceProvider.GetService<AccountWebSocket>());
             app.UseEndpoints(endpoints =>
             {                

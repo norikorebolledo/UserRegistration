@@ -1,5 +1,6 @@
 ﻿using Core.Common.Contracts.Date;
 using Core.Common.Contracts.Mail;
+using Core.Common.Contracts.Session;
 using Core.Common.Helpers;
 using Core.Common.Mail;
 using Microsoft.AspNetCore.Http;
@@ -19,24 +20,24 @@ namespace UserRegistration.Service
     {
         private readonly IUserRepository _userRepository;
         private readonly SecuritySettings _securitySettings;
-        private readonly IHttpContextAccessor _httpContext;
         private readonly IEmailVerificationRepository _emailVerificationRepository;
         private readonly IHelperService _helperService;
         private readonly IDateTime _dateTime;
+        private readonly ISessionService _sessionService;
 
         public LoginService(IUserRepository userRepository,
             IOptions<SecuritySettings> securitySettings,
-            IHttpContextAccessor httpContext,
             IEmailVerificationRepository emailVerificationRepository,
             IHelperService helperService,
-            IDateTime dateTime)
+            IDateTime dateTime,
+            ISessionService sessionService)
         {
             _userRepository = userRepository;
             _securitySettings = securitySettings.Value;
-            _httpContext = httpContext;
             _emailVerificationRepository = emailVerificationRepository;
             _helperService = helperService;
             _dateTime = dateTime;
+            _sessionService = sessionService;
         }
 
 
@@ -125,6 +126,7 @@ namespace UserRegistration.Service
                     }
 
                     string sessionId = Guid.NewGuid().ToString();
+                    await _sessionService.SetAsync(sessionId, user.Username, _securitySettings.SessionValidityInSeconds);
 
                     return new LoginResponse
                     {

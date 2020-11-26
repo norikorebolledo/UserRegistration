@@ -1,7 +1,9 @@
 ﻿using Core.Common.Contracts.Date;
 using Core.Common.Contracts.Mail;
+using Core.Common.Contracts.Session;
 using Core.Common.Date;
 using Core.Common.Mail;
+using Core.Common.Session;
 using Core.Data.MongoDb;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -23,10 +25,11 @@ namespace UserRegistration.Bootstrapper
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IMailService, MailService>();
             services.AddSingleton<IHelperService, HelperService>();
             services.AddSingleton<IDateTime, AppDateTime>();
+            services.AddSingleton<ISessionService, SessionService>();
 
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.Configure<SecuritySettings>(configuration.GetSection("SecuritySettings"));
