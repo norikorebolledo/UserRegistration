@@ -25,7 +25,6 @@ namespace UserRegistration.Bootstrapper
     {
         public static IServiceCollection RegisterService(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IMailService, MailService>();
             services.AddSingleton<IHelperService, HelperService>();
             services.AddSingleton<IDateTime, AppDateTime>();
