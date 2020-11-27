@@ -99,7 +99,7 @@ namespace UserRegistration.Service
 
             if (isValid)
             {
-                var user = await _userRepository.FindAsync(f => f.Username == model.Username);
+                var user = await _userRepository.FindAsync(f => f.Username == model.UsernameOrEmail);
 
                 if (user != null)
                 {

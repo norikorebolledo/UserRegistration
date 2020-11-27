@@ -128,7 +128,7 @@ namespace UserRegistration.Service.Tests
                 // Act
                 var saltResponse = await loginService.Login(new LoginRequest
                 {
-                    Username = "johndoe",
+                    UsernameOrEmail = "johndoe",
                     Challenge = "challenge"
                 });
 
@@ -173,7 +173,7 @@ namespace UserRegistration.Service.Tests
                 // Act
                 var saltResponse = await loginService.Login(new LoginRequest
                 {
-                    Username = "johndoe",
+                    UsernameOrEmail = "johndoe",
                     Challenge = "challenge"
                 });
 
@@ -220,7 +220,7 @@ namespace UserRegistration.Service.Tests
                 // Act
                 var saltResponse = await loginService.Login(new LoginRequest
                 {
-                    Username = "johndoe",
+                    UsernameOrEmail = "johndoe",
                     Challenge = "challenge"
                 });
 

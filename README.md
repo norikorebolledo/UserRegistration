@@ -53,7 +53,9 @@ The project uses [SQL Server](https://www.nuget.org/packages/Microsoft.EntityFra
 
 ### UI Test
 Use the simple UI in the root URL to test the calls in WebSocket. You may check the API response below. Refer to the image below:
-![Testing Ui](Screenshots/testing-ui.png)
+![Uitesting](Screenshots/uitesting.png)
+
+You may click the buttons to add example json request on the textarea and click the "Request" button below to call a request to the WebSockets
 
 ### Unit Test
 The solution also contains Unit Testing to test the business requirements. You can find it under the Test folder.

@@ -9,7 +9,7 @@ namespace UserRegistration.Models
     public class LoginRequest : BaseModel<LoginRequest>
     {
         public string Command { get; set; }
-        public string Username { get; set; }
+        public string UsernameOrEmail { get; set; }
         public string Challenge { get; set; }
         public string Password { get; set; }
 
@@ -22,7 +22,7 @@ namespace UserRegistration.Models
         {
             public Validator()
             {
-                RuleFor(c => c.Username).NotEmpty().NotNull();
+                RuleFor(c => c.UsernameOrEmail).NotEmpty().NotNull();
                 RuleFor(c => c.Challenge).NotEmpty().NotNull();
             }
         }

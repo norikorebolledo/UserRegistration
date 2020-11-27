@@ -1,57 +1,23 @@
 ﻿<h1>User Registration API</h1>
 
-<h3>Registration</h3>
+<input type="button" id="setVerification" value="Verification Code System for Registration JSON" />
+<input type="button" id="setRegister" value="User Registration JSON" />
+<input type="button" id="setUsernameAvailability" value="Check Username Availability JSON" />
+<input type="button" id="setEmailAvailability" value="Check Email Availability JSON" />
+<input type="button" id="setLoginSalt" value="Request Login Salt JSON" />
+<input type="button" id="setPerformLogin" value="Perform Login JSON" />
+<h3>Request</h3>
 <div class="container">
     <div class="row">&nbsp;</div>
     <div class="row">
-        <div class="col-2">Username</div>
-        <div class="col-4"><input type="text" value="johndoe" id="usernameInput" /></div>
-    </div>
-    <div class="row">
-        <div class="col-2">Password</div>
-        <div class="col-4"><input type="text" value="somePassword" id="passwordInput" /></div>
-    </div>
-    <div class="row">
-        <div class="col-2">Email</div>
-        <div class="col-4"><input value="john.doe@mail.com" type="text" id="emailInput" /></div>
+        <div class="col-2">Put you JSON request here</div>
+        <textarea style="height:300px;width:300px" id="jsonRequestInput">
+        </textarea>
     </div>
     <div class="row">&nbsp;</div>
     <div class="row">
         <div class="col-6">
-            <input type="button" id="verifyEmail" value="Verify Email" />
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-2">Verification Code</div>
-        <div class="col-4"><input type="text" id="verificationCodeInput" /></div>
-    </div>
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-6">
-            <input type="button" id="register" value="Register" />
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <hr />
-    </div>
-</div>
-<h3>Login</h3>
-<div class="container">
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-2">Username</div>
-        <div class="col-4"><input type="text" value="johndoe" id="usernameLoginInput" /></div>
-    </div>
-    <div class="row">
-        <div class="col-2">Password</div>
-        <div class="col-4"><input type="text" value="somePassword" id="passwordLoginInput" /></div>
-    </div>
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-6">
-            <input type="button" id="login" value="Login" />
+            <input type="button" id="request" value="Request" />
         </div>
     </div>
 </div>
@@ -66,32 +32,114 @@
 
     </div>
 </div>
+<div class="row">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+<h3>Generate Challenge</h3>
+<div class="container">
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-2">Key</div>
+        <div class="col-4"><input type="text" value="superSecretKey" id="keyInput" /></div>
+    </div>
+    <div class="row">
+        <div class="col-2">Username</div>
+        <div class="col-4"><input type="text" value="johndoe" id="usernameInput" /></div>
+    </div>
+    <div class="row">
+        <div class="col-2">Password</div>
+        <div class="col-4"><input type="text" value="somePassword" id="passwordInput" /></div>
+    </div>
+    <div class="row">
+        <div class="col-2">Salt</div>
+        <div class="col-4"><input type="text" id="saltInput" /></div>
+    </div>
+    <div class="row">
+        <div class="col-2">Challenge</div>
+        <div class="col-4"><input readonly type="text" id="challengeInput" /></div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-6">
+            <input type="button" id="generateChallenge" value="Generate" />
+        </div>
+    </div>
+</div>
 <script src="~/lib/jsSHA-3.1.2/sha.js"></script>
 <script language="javascript" type="text/javascript">
     (function () {
 
         var uri = "wss://" + window.location.host + "/ws";
         var socket = new WebSocket(uri);
-        document.getElementById("register").disabled = true;
-        document.getElementById("login").disabled = true;
-        document.getElementById("verifyEmail").disabled = true;
+        document.getElementById("request").disabled = true;
+
+
+        document.getElementById("setVerification").addEventListener("click", function () {
+            setJsonTextArea(`{
+            "command": "emailVerification",
+            "email": "john.doe@mail.com",
+            "username": "johndoe"
+        }
+        `);
+        });
+        document.getElementById("setVerification").click();
+        document.getElementById("setRegister").addEventListener("click", function () {
+            setJsonTextArea(`{
+            "command": "register",
+            "username": "johndoe",
+            "displayName": "Bigjohndoe",
+            "password": "8437ae0231129d7038809d7aa68e89430b73e245b99b9cc662cbc0bd9cc6f6da",
+            "password2": "8437ae0231129d7038809d7aa68e894902345bde25ad0fb662cbc0bd9cc6f6da",
+            "email": "john.doe@mail.com",
+            "verificationCode": "123456"
+        }
+        `);
+        });
+        document.getElementById("setUsernameAvailability").addEventListener("click", function () {
+            setJsonTextArea(`{
+                "command": "checkUsername",
+                "username": "johndoe"
+            }
+            `);
+        });
+        document.getElementById("setEmailAvailability").addEventListener("click", function () {
+            setJsonTextArea(`{
+                "command": "checkEmail",
+                "email": "john.doe@mail.com"
+            }
+            `);
+        });
+        document.getElementById("setLoginSalt").addEventListener("click", function () {
+            setJsonTextArea(`{
+                "command": "loginSalt",
+                "username": "johndoe"
+            }
+            `);
+        });
+        document.getElementById("setPerformLogin").addEventListener("click", function () {
+            setJsonTextArea(`{
+            "command": "login",
+            "usernameOrEmail": "johndoe",
+            "challenge": "02b78364fee0f76cdfb64c17b6a919b2940198742cb3f989af9271a81e9471c8"
+        }
+        `);
+        });
+
+        document.getElementById("generateChallenge").addEventListener("click", function () {
+            document.getElementById("challengeInput").value = generateChallenge();
+        });
 
         function connect() {
 
             socket.onopen = function (event) {
-                console.log("opened connection to " + uri);
-                document.getElementById("register").disabled = false;
-                document.getElementById("register").addEventListener("click", function () {
-                    register();
+                document.getElementById("request").disabled = false;
+                document.getElementById("request").addEventListener("click", function () {
+                    jsonRequest();
                 });
-                document.getElementById("login").disabled = false;
-                document.getElementById("login").addEventListener("click", function () {
-                    requestLoginSalt();
-                });
-                document.getElementById("verifyEmail").disabled = false;
-                document.getElementById("verifyEmail").addEventListener("click", function () {
-                    verifyEmail();
-                });
+
+                document.getElementById("responseContainer").innerHTML = 'Connected to WebSocket';
             };
             socket.onclose = function (event) {
                 console.log("closed connection from " + uri);
@@ -99,58 +147,12 @@
             socket.onmessage = function (event) {
                 console.log(event.data);
                 document.getElementById("responseContainer").innerHTML = event.data;
-                var response = JSON.parse(event.data);
-
-                if (response.Command == 'loginSalt') {
-                    login(response);
-                }
-
             };
             socket.onerror = function (event) {
                 console.log("error: " + event.data);
             };
         }
 
-        function register() {
-            var username = document.getElementById("usernameInput").value;
-            var password = document.getElementById("passwordInput").value;
-            var email = document.getElementById("emailInput").value;
-            var verificationCode = document.getElementById("verificationCodeInput").value;
-            var hashedPassword = hash(password, username);
-
-            socket.send(JSON.stringify({
-                command: 'register',
-                username: username,
-                password: hashedPassword,
-                email: email,
-                verificationCode: verificationCode
-            }));
-        }
-
-        function requestLoginSalt() {
-            var username = document.getElementById("usernameLoginInput").value;
-            var password = document.getElementById("passwordLoginInput").value;
-            socket.send(JSON.stringify({
-                command: "loginSalt",
-                username: username,
-                password: password
-            }));
-        }
-
-        function login(response) {
-            if (response.Success) {
-                var username = document.getElementById("usernameLoginInput").value;
-                var password = document.getElementById("passwordLoginInput").value;
-                var hashedPassword = hash(password, username);
-                var hmac = hash('superSecretKey', hashedPassword);
-                var challenge = hash(response.Salt, hmac);
-                socket.send(JSON.stringify({
-                    command: 'login',
-                    username: username,
-                    challenge: challenge
-                }));
-            }
-        }
 
         function hash(key, message) {
             var shaObj = new jsSHA("SHA-256", "TEXT");
@@ -159,17 +161,36 @@
             return shaObj.getHMAC("HEX");
         }
 
-        function verifyEmail() {
-            var username = document.getElementById("usernameInput").value;
-            var email = document.getElementById("emailInput").value;
 
-            socket.send(JSON.stringify({
-                command: "emailVerification",
-                email: email, username: username
-            }));
+        function jsonRequest() {
+
+            var json = document.getElementById("jsonRequestInput").value;
+
+            try {
+                JSON.parse(json);
+            } catch (e) {
+                alert('Invalid json')
+            }
+
+            socket.send(json);
+        }
+
+        function setJsonTextArea(json) {
+            document.getElementById("jsonRequestInput").value = json;
         }
 
         connect();
+
+        function generateChallenge() {
+            var username = document.getElementById("usernameInput").value;
+            var password = document.getElementById("passwordInput").value;
+            var salt = document.getElementById("saltInput").value;
+            var key = document.getElementById("keyInput").value;
+            var hashedPassword = hash(password, username);
+            var hmac = hash(key, hashedPassword);
+            return hash(salt, hmac);
+
+        }
 
     })();
 
