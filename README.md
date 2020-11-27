@@ -61,6 +61,17 @@ You may click the buttons to add example json request on the textarea and click 
 The solution also contains Unit Testing to test the business requirements. You can find it under the Test folder.
 
 
+### WebSocket
+You can use websocket by using the prefix using the prefix /ws
+
+Here are the example of the javascript call:
+
+```javascript
+var uri = "wss://" + window.location.host + "/ws";
+var socket = new WebSocket(uri);
+
+```
+
 ## Other Settings
 ### Mail
 You can add also a mail settings to send email by configuring it on the appsettings.Development.json
