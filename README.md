@@ -62,7 +62,7 @@ The solution also contains Unit Testing to test the business requirements. You c
 
 
 ### WebSocket
-You can use websocket by using the prefix using the prefix /ws
+You can use websocket by using the prefix /ws
 
 Here are the example of the javascript call:
 
@@ -105,6 +105,8 @@ You may also change some security settings, you can find it on appsettings.Devel
   },
 
 ```
+
+
 
 
 
